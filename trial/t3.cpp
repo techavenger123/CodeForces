@@ -6,11 +6,9 @@ using namespace std;
 typedef vector<int> vi;
 typedef vector<bool> vb;
 
-int findcloset(vi &dist, vb &fin) {
+int findcloset(const vi &dist, const vb &fin) {
     int closest = -1, minele = INT_MAX;
-    cout<<"Entered : "<<endl;
-    for (int i = 0; i < dist.size(); i++) {
-        cout<<"Entered loop : "<<endl;
+    for (int i = 1; i < (int)dist.size(); i++) { // nodes are 1..n
         if (!fin[i] && dist[i] < minele) {
             closest = i;
             minele = dist[i];
@@ -19,25 +17,29 @@ int findcloset(vi &dist, vb &fin) {
     return closest;
 }
 
-void dij(unordered_map<int,unordered_map<int,int>> &mp, int src,vb &fin,vi &dist) {
-    int n=dist.size();
+void dij(unordered_map<int,unordered_map<int,int>> &mp, int src, vb &fin, vi &dist) {
+    int n = dist.size() - 1;
     dist[src] = 0;
-    for (int i = 0; i < n; i++) {
+    for (int i = 1; i <= n; i++) {
         int closet = findcloset(dist, fin);
+        if (closet == -1) break; // no more reachable nodes
         fin[closet] = true;
-        for (pair<int,int> p : mp[closet]) {
+
+        for (auto &p : mp[closet]) {
             int nei = p.first;
             int weight = p.second;
             if (!fin[nei] && dist[closet] != INT_MAX && dist[closet] + weight < dist[nei]) {
                 dist[nei] = dist[closet] + weight;
-                fin[nei] = true;
+                // don't mark fin[nei] here!
             }
         }
     }
 
-    cout << "Distances:\n";
-    for (int i = 0; i < n; i++) {
-        cout<<i<<" ";
+    cout << "Vertex : Distance from source\n";
+    for (int i = 1; i <= n; i++) {
+        cout << i << " : ";
+        if (dist[i] == INT_MAX) cout << "INF\n";
+        else cout << dist[i] << "\n";
     }
 }
 
@@ -51,11 +53,12 @@ int main() {
         mp[a][b] = c;
         mp[b][a] = c;
     }
-    vb fin(n+1, false);
+    vb fin(n+1, false);       // 1-based indexing
     vi dist(n+1, INT_MAX);
-    dij(mp, 1,fin,dist);
+    dij(mp, 1, fin, dist);    // source = 1
     return 0;
 }
+
 /*
 Input:
 5 6
